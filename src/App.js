@@ -1,25 +1,80 @@
-import logo from './logo.svg';
-import './App.css';
+import Table from "./Table";
+import Form from "./Form";
+import { getData ,deleteData,postData,putData} from "./Api";
+import { useEffect, useState } from "react";
+function App(){
+ let [products,setProducts]= useState([])
+ let [openForm,setOpenForm]=useState(false);
+ let [edit,setEDit]=useState(false);
+ 
+ let [intialData,setIntialData]=useState({
+   name:'',
+   price:'',
+   category:''
+ })
+  useEffect(
+   ()=>{
+    getProducts();
+   },[]
+  )
+  let getProducts= async()=>{
+  let res= await  getData();
+  setProducts(res.data)
+  }
+  let deleteProducts = async (id) => {
+    await deleteData(id);
+    getProducts();
+  }
+  let addProducts = async (product) => {
+    let data={
+      name:product.name,
+      price:product.price,
+      category:product.category
+    }
 
-function App() {
+    if(edit){
+     await putData(product.id,data)
+    }
+    else{
+      await postData(data);
+    }
+    
+
+    getProducts();
+    setOpenForm(false);
+ 
+
+  }
+  let editProducts = async (data) => {
+    setIntialData(data)
+    setOpenForm(true);
+    setEDit(true);
+  
+ 
+
+  }
+    function ShowForm(){
+      setOpenForm(true);
+      setIntialData({
+        name:'',
+        price:'',
+        category:''
+      })
+      setEDit(false);
+    }
+    function CloseFom(){
+      setOpenForm(false);
+    }
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    
+      <div className="wrapper m-5 w-50">
+        <h2 className="text-center text-primary">React Crud Operation </h2>
+        <button className="btn btn-success float-end" onClick={ShowForm} >ADD</button>
+        <Table products={products} delete={deleteProducts}  edit={editProducts} />
+        {openForm&&<Form close={CloseFom} data={intialData} add={addProducts} />}
+        
+      </div>
+  
+  )
 }
-
 export default App;
